@@ -28,4 +28,3 @@
   with_items:
     - rpcbind
     - nfs
-
