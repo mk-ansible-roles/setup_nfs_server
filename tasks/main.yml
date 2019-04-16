@@ -1,5 +1,11 @@
 ---
 # tasks file for setup-nfs-server
+
+- name: "The following directories will be setup"
+  debug: 
+     msg: "Directory: {{ item.key }} with parameters: {{ item.value }} "  
+  with_dict: "{{ exportdirs }}"
+
 - name: ensure NFS Server packages are installed
   yum:
     state: present
@@ -7,16 +13,33 @@
   with_items:
     - nfs-utils
     - rpcbind
+    - policycoreutils-python
+
+- name: make sure files in /export get the correct security context
+  sefcontext:
+    target: '{{ item.key }}(/.*)?'
+    setype: public_content_rw_t
+    state: present
+  with_dict: "{{ exportdirs }}"
+
+- name: make sure directory exist 
+  file:
+          path: "{{ item.key }}"
+          mode: 0755
+          state: directory
+          setype: public_content_rw_t
+  with_dict: "{{ exportdirs }}"
     
 - name: ensure {{ exportdir }} is exported
   lineinfile:
     path: /etc/exports
-    regexp: '^{{ exportdir }} '
-    line: '{{ exportdir }} {{ exportparameter }}'
+    regexp: '^{{ item.key }} '
+    line: '{{ item.key }} {{ item.value }}'
+  with_dict: "{{ exportdirs }}"
 
 - name: ensure firewall ports 2049/tcp are open
   firewalld:
-    port: 2049/tcp
+    service: nfs
     permanent: true
     state: enabled
  

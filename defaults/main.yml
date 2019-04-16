@@ -1,5 +1,5 @@
 ---
 # defaults file for setup-nfs-server
 #
-exportdir: /export
-exportparameter: '*(rw,sync)'
+exportdirs: 
+    - /export: '*(rw,sync)'
