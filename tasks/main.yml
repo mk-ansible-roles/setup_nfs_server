@@ -9,11 +9,10 @@
 - name: ensure NFS Server packages are installed
   yum:
     state: present
-    name: "{{ item }}"
-  with_items:
-    - nfs-utils
-    - rpcbind
-    - policycoreutils-python
+    name: 
+      - nfs-utils
+      - rpcbind
+      - policycoreutils-python
 
 - name: make sure files in /export get the correct security context
   sefcontext:
@@ -40,8 +39,9 @@
 - name: ensure firewall ports 2049/tcp are open
   firewalld:
     service: nfs
-    permanent: true
+    permanent: yes
     state: enabled
+    immediate: yes
  
 - name: ensure nfs Service are running
   service:
