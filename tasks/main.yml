@@ -36,12 +36,19 @@
     line: '{{ item.key }} {{ item.value }}'
   with_dict: "{{ exportdirs }}"
 
+- name: check if firewalld is running
+  command: systemctl is-active firewalld
+  changed_when: false
+  failed_when: false
+  register: setup_nfs_server_register_firewald_state
+
 - name: ensure firewall ports 2049/tcp are open
   firewalld:
     service: nfs
     permanent: yes
     state: enabled
     immediate: yes
+  when: setup_nfs_server_register_firewald_state.rc == 0
  
 - name: ensure nfs Service are running
   service:
