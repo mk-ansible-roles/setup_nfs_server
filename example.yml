@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+
+  vars:
+          ansible_connection: local
+          exportdirs: 
+               - /upload: '192.168.0.0/16(ro)'
+
+  roles:
+          - { role: mk-ansible-roles.setup_nfs_server }
+
