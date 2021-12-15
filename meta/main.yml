@@ -5,9 +5,9 @@ galaxy_info:
   min_ansible_version: 2.4
   platforms:
   - name: EL
-    versions: [ 7 ]
+    versions: [7, 8]
 
-  galaxy_tags: [ 'system', 'nfs', 'beta' ]
+  galaxy_tags: ['system', 'nfs']
 
 dependencies: []
   # List your role dependencies here, one per line. Be sure to remove the '[]' above,

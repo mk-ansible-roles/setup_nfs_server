@@ -1,60 +1,22 @@
 ---
-# tasks file for setup-nfs-server
 
-- name: "The following directories will be setup"
-  debug: 
-     msg: "Directory: {{ item.key }} with parameters: {{ item.value }} "  
-  with_dict: "{{ exportdirs }}"
+- name: include os specific vars
+  include_vars: '{{ item }}'
+  with_first_found:
+    - '{{ ansible_distribution }}_{{ ansible_distribution_version }}.yml'
+    - '{{ ansible_distribution }}_{{ ansible_distribution_major_version }}.yml'
+    - '{{ ansible_os_family }}.yml'
+  tags:
+    - 'role::setup_nfs_server'
+    - 'role::setup_nfs_server:install'
+    - 'role::setup_nfs_server:config'
 
-- name: ensure NFS Server packages are installed
-  yum:
-    state: present
-    name: 
-      - nfs-utils
-      - rpcbind
-      - policycoreutils-python
+- include_tasks: '{{ ansible_distribution }}/installation.yml'
+  tags:
+    - 'role::setup_nfs_server'
+    - 'role::setup_nfs_server:install'
 
-- name: make sure files in /export get the correct security context
-  sefcontext:
-    target: '{{ item.key }}(/.*)?'
-    setype: public_content_rw_t
-    state: present
-  with_dict: "{{ exportdirs }}"
-
-- name: make sure directory exist 
-  file:
-          path: "{{ item.key }}"
-          mode: 0755
-          state: directory
-          setype: public_content_rw_t
-  with_dict: "{{ exportdirs }}"
-    
-- name: ensure {{ exportdir }} is exported
-  lineinfile:
-    path: /etc/exports
-    regexp: '^{{ item.key }} '
-    line: '{{ item.key }} {{ item.value }}'
-  with_dict: "{{ exportdirs }}"
-
-- name: check if firewalld is running
-  command: systemctl is-active firewalld
-  changed_when: false
-  failed_when: false
-  register: setup_nfs_server_register_firewald_state
-
-- name: ensure firewall ports 2049/tcp are open
-  firewalld:
-    service: nfs
-    permanent: yes
-    state: enabled
-    immediate: yes
-  when: setup_nfs_server_register_firewald_state.rc == 0
- 
-- name: ensure nfs Service are running
-  service:
-    name: "{{ item }}"
-    state: started
-    enabled: yes
-  with_items:
-    - rpcbind
-    - nfs
+- include_tasks: '{{ ansible_distribution }}/configuration.yml'
+  tags:
+    - 'role::setup_nfs_server'
+    - 'role::setup_nfs_server:config'
