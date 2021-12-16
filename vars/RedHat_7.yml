@@ -1,0 +1,9 @@
+---
+setup_nfs_server_packages:
+      - nfs-utils
+      - rpcbind
+      - policycoreutils-python
+
+setup_nfs_server_services:
+      - rpcbind
+      - nfs

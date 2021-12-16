@@ -1,0 +1,50 @@
+---
+# tasks file for setup-nfs-server
+
+- name: "The following directories will be setup"
+  debug:
+     msg: "Directory: {{ item.key }} with parameters: {{ item.value }} "
+  with_dict: "{{ exportdirs }}"
+
+- name: make sure files in /export get the correct security context
+  sefcontext:
+    target: '{{ item.key }}(/.*)?'
+    setype: public_content_rw_t
+    state: present
+  with_dict: "{{ exportdirs }}"
+
+- name: make sure directory exist
+  file:
+          path: "{{ item.key }}"
+          mode: 0755
+          state: directory
+          setype: public_content_rw_t
+  with_dict: "{{ exportdirs }}"
+
+- name: ensure {{ exportdir }} is exported
+  lineinfile:
+    path: /etc/exports
+    regexp: '^{{ item.key }} '
+    line: '{{ item.key }} {{ item.value }}'
+  with_dict: "{{ exportdirs }}"
+
+- name: check if firewalld is running
+  command: systemctl is-active firewalld
+  changed_when: false
+  failed_when: false
+  register: setup_nfs_server_register_firewald_state
+
+- name: ensure firewall ports 2049/tcp are open
+  firewalld:
+    service: nfs
+    permanent: true
+    state: enabled
+    immediate: true
+  when: setup_nfs_server_register_firewald_state.rc == 0
+
+- name: ensure nfs Service are running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop: "{{ setup_nfs_server_services }}"

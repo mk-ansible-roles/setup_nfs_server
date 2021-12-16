@@ -1,0 +1,7 @@
+---
+# tasks file for setup-nfs-server
+
+- name: ensure NFS Server packages are installed
+  package:
+    state: present
+    name: "{{ setup_nfs_server_packages }}"
