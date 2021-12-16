@@ -11,12 +11,12 @@
     - 'role::setup_nfs_server:install'
     - 'role::setup_nfs_server:config'
 
-- include_tasks: '{{ ansible_distribution }}/installation.yml'
+- include_tasks: installation.yml
   tags:
     - 'role::setup_nfs_server'
     - 'role::setup_nfs_server:install'
 
-- include_tasks: '{{ ansible_distribution }}/configuration.yml'
+- include_tasks: configuration.yml
   tags:
     - 'role::setup_nfs_server'
     - 'role::setup_nfs_server:config'
